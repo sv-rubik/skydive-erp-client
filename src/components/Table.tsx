@@ -93,7 +93,7 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate }: TableProps<T>) 
     } else {
       // If it's an existing row, call onUpdate function instead
       setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-      // TODO сюда вклячить onUpdate
+      // TODO add onUpdates
     }
   };
 

@@ -14,8 +14,11 @@ import {
   GridColDef,
   GridToolbarContainer,
   GridActionsCellItem,
+  GridEventListener,
   GridRowId,
   GridRowModel,
+  GridEditCellValueParams,
+  GridRowEditStopReasons,
 } from '@mui/x-data-grid';
 import {
   randomId,
@@ -26,29 +29,18 @@ interface EditToolbarProps {
   setRowModesModel: (
     newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
   ) => void;
+  onNewRow: any;
 }
 
 function EditToolbar(props: EditToolbarProps) {
-  const { setRows, setRowModesModel } = props;
+  const { setRows, setRowModesModel, onNewRow } = props;
 
   const handleClick = () => {
-    const id = randomId();
-    const newRow = {
-      id,
-      rigNumber: '',
-      rigName: '',
-      rigSize: '',
-      rigType: '',
-      rigSerial: '',
-      rigDOM: '',
-      rigDescription: '',
-      container: '',
-      isNew: true
-    }
-    setRows((oldRows) => [...oldRows, newRow]);
+
+    setRows((oldRows) => [...oldRows, onNewRow]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'rigName' },
+      [onNewRow.id]: { mode: GridRowModes.Edit, fieldToFocus: 'rigName' }, // TODO fieldToFocus
     }));
   };
 
@@ -66,35 +58,46 @@ interface TableProps<T> {
   columns: GridColDef[];
   onDelete: any;
   onCreate: any;
+  onNewRow: any;
 }
 
-const Table = <T,>({ initialRows, columns, onDelete, onCreate }: TableProps<T>) => {
+const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow }: TableProps<T>) => {
   const { palette } = useTheme();
   const [rows, setRows] = React.useState(initialRows);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
 
+  const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
+    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+      event.defaultMuiPrevented = true;
+    }
+  };
+
   const handleEditClick = (id: GridRowId) => () => {
+    console.log(id)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
   const handleSaveClick = (id: GridRowId) => () => {
-    // TODO add notification on Bad request error
-    const editedRow = rows.find((row) => row.id === id);
-    console.log(editedRow)
-    console.log(rows)
-    console.log(initialRows)
-    const isEditedRowInInitialRows = initialRows.some(row => {
-      return editedRow && row.id === editedRow.id; // Check that editedRow is not undefined for TS
-    });
-    // If it's a new row, call onCreate to create the row on the server
-    if (!isEditedRowInInitialRows) {
-      onCreate(editedRow)
-      setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-    } else {
-      // If it's an existing row, call onUpdate function instead
-      setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-      // TODO add onUpdates
-    }
+
+    // // TODO add notification on Bad request error
+    // const editedRow = rows.find((row) => row.id === id);
+    // console.log(`editedRow - ${JSON.stringify(editedRow)}`)
+    // console.log(rows)
+    // console.log(initialRows)
+    // const isEditedRowInInitialRows = initialRows.some(row => {
+    //   return editedRow && row.id === editedRow.id; // Check that editedRow is not undefined for TS
+    // });
+    // // If it's a new row, call onCreate to create the row on the server
+    // if (!isEditedRowInInitialRows) {
+    //   setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+    //   onCreate(editedRow)
+    // } else {
+    //   // If it's an existing row, call onUpdate function instead
+    //   setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+    //   // TODO add onUpdate
+    // }
+
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
@@ -110,6 +113,8 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate }: TableProps<T>) 
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
+    console.log(newRow)
+    if (newRow.isNew) {onCreate(newRow)}
     const updatedRow = { ...newRow, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
     return updatedRow;
@@ -200,13 +205,20 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate }: TableProps<T>) 
           // slots={{ toolbar: GridToolbar }}
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
+          onRowEditStop={handleRowEditStop}
           processRowUpdate={processRowUpdate}
-          onProcessRowUpdateError={(error) => {
-            console.error(error);
-          }}
+          // onProcessRowUpdateError={(error) => {
+          //   console.error(error);
+          // }}
+          // onEditCellChange={(params: GridEditCellValueParams) => {
+          //   const updatedRows = rows.map((row) =>
+          //     row.id === params.id ? { ...row, [params.field]: params.value } : row
+          //   );
+          //   setRows(updatedRows);
+          // }}
           slots={{ toolbar: EditToolbar }}
           slotProps={{
-            toolbar: { setRows, setRowModesModel },
+            toolbar: { setRows, setRowModesModel, onNewRow },
           }}
         />
       </Box>

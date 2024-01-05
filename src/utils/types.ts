@@ -21,7 +21,7 @@ export interface AAD {
   aadDueService: string;
   aadFinal: string;
   jumps: number;
-  rig: string;
+  rig?: string;
   createdAt: Date;
   updatedAt: Date;
 }

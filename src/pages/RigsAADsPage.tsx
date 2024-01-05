@@ -11,7 +11,7 @@ interface RigsAADsPageProps {
 }
 
 const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCreate }) => {
-
+  // console.log(aadsData)
   const columns = [
     {
       field: 'rigID',
@@ -27,6 +27,7 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
       field: 'rigName',
       headerName: 'Rig Name',
       flex: 0.1,
+      editable: true,
       renderCell: (params: GridRenderCellParams) => (
         <span style={{ color:'blue'}}>
           {params.value}
@@ -37,31 +38,37 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
       field: 'aadSerial',
       headerName: 'aadSerial',
       flex: 0.1,
+      editable: true,
     },
     {
       field: 'aadManufacturer',
       headerName: 'aadManufacturer',
       flex: 0.1,
+      editable: true,
     },
     {
       field: 'aadType',
       headerName: 'aadType',
       flex: 0.1,
+      editable: true,
     },
     {
       field: 'aadDOM',
       headerName: 'aadDOM',
       flex: 0.2,
+      editable: true,
     },
     {
       field: 'jumps',
       headerName: 'jumps',
       flex: 0.1,
+      editable: true,
     },
     {
       field: 'rigDescription',
       headerName: 'Comments',
       flex: 0.3,
+      editable: true,
       renderCell: (params: GridRenderCellParams) => (
         <span style={{ color:'blue'}}>
           {params.value}

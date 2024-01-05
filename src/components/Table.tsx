@@ -78,6 +78,7 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow }: Table
   };
 
   const handleSaveClick = (id: GridRowId) => () => {
+
     // // TODO add notification on Bad request error
     // const editedRow = rows.find((row) => row.id === id);
     // console.log(`editedRow - ${JSON.stringify(editedRow)}`)

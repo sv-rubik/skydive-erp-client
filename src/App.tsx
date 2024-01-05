@@ -32,7 +32,7 @@ function App() {
           return {
             ...row,
             id: row._id || '',
-            rigID: matchingRig ? matchingRig._id : null,
+            // rigID: matchingRig ? matchingRig._id : null,
             rigName: matchingRig ? matchingRig.rigName : null,
             rigDescription: matchingRig ? matchingRig.rigDescription : null,
           };
@@ -126,8 +126,8 @@ function App() {
       aadManufacturer: 'Vigil',
       aadType: 'C2 TAN',
       aadDOM: '20.11.2023',
-      aadDueService: '20.11.2023',
-      aadFinal: '20.11.2024',
+      aadDueService: '',
+      aadFinal: '',
       jumps: 20,
       rig: '',
       createdAt: new Date(),

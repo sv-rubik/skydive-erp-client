@@ -3,6 +3,7 @@ import Table from "../components/Table";
 import {AAD, Rig} from "../utils/types";
 import { GridRenderCellParams } from '@mui/x-data-grid';
 import TableHeader from "../components/TableHeader";
+import {randomId} from "@mui/x-data-grid-generator";
 
 interface RigsAADsPageProps {
   aadsData: AAD[];
@@ -11,14 +12,28 @@ interface RigsAADsPageProps {
 }
 
 const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCreate }) => {
-  // console.log(aadsData)
+  const id = randomId();
+  const newAADRow = {
+    id,
+    aadSerial: '',
+    aadManufacturer: '',
+    aadType: '',
+    aadDOM: '',
+    aadDueService: '',
+    aadFinal: '',
+    jumps: '',
+    rig: '',
+    isNew: true
+  }
+
   const columns = [
     {
-      field: 'rigID',
-      headerName: 'Rig _id',
-      flex: 0.1,
+      field: 'rig',
+      headerName: 'Rig _id from AAD',
+      flex: 0.2,
+      editable: true,
       renderCell: (params: GridRenderCellParams) => (
-        <span style={{ color:'blue'}}>
+        <span style={{ color:'red'}}>
           {params.value}
         </span>
       ),
@@ -27,7 +42,6 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
       field: 'rigName',
       headerName: 'Rig Name',
       flex: 0.1,
-      editable: true,
       renderCell: (params: GridRenderCellParams) => (
         <span style={{ color:'blue'}}>
           {params.value}
@@ -51,6 +65,8 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
       headerName: 'aadType',
       flex: 0.1,
       editable: true,
+      type: 'singleSelect',
+      valueOptions: ['C2 TAN', 'C-MODE', 'C2 STU', 'C2 CMode'],
     },
     {
       field: 'aadDOM',
@@ -68,7 +84,6 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
       field: 'rigDescription',
       headerName: 'Comments',
       flex: 0.3,
-      editable: true,
       renderCell: (params: GridRenderCellParams) => (
         <span style={{ color:'blue'}}>
           {params.value}
@@ -80,7 +95,7 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
   return (
     <>
       <TableHeader text={`RigsAADsPage table`} />
-      <Table initialRows={aadsData} columns={columns} onDelete={onDelete} onCreate={onCreate}/>
+      <Table initialRows={aadsData} columns={columns} onDelete={onDelete} onCreate={onCreate} onNewRow={newAADRow}/>
     </>
 
   )

@@ -3,6 +3,7 @@ import Table from "../components/Table";
 import {AAD, Rig} from "../utils/types";
 import {GridRenderCellParams} from "@mui/x-data-grid";
 import TableHeader from "../components/TableHeader";
+import {randomId} from "@mui/x-data-grid-generator";
 
 interface RigsPageProps {
   rigsData: Rig[];
@@ -13,8 +14,26 @@ interface RigsPageProps {
 
 const RigsPage: React.FC<RigsPageProps>  = ({ rigsData, onDelete, onCreate }) => {
   // console.log(JSON.stringify(rigsData, null, 2));
+  const id = randomId();
+  const newRigRow = {
+    id,
+    rigNumber: '',
+    rigName: '',
+    rigSize: '',
+    rigType: '',
+    rigSerial: '',
+    rigDOM: '',
+    rigDescription: '',
+    container: '',
+    isNew: true
+  };
 
   const columns = [
+    {
+      field: '_id',
+      headerName: 'Rig _id',
+      flex: 0.2,
+    },
     {
       field: 'rigNumber',
       headerName: 'Rig #',
@@ -38,6 +57,8 @@ const RigsPage: React.FC<RigsPageProps>  = ({ rigsData, onDelete, onCreate }) =>
       headerName: 'Rig Type',
       flex: 0.1,
       editable: true,
+      type: 'singleSelect',
+      valueOptions: ['tandem', 'student', 'instructor'],
     },
     {
       field: 'rigSerial',
@@ -78,7 +99,7 @@ const RigsPage: React.FC<RigsPageProps>  = ({ rigsData, onDelete, onCreate }) =>
   return (
     <>
       <TableHeader text={`RigsPage table`} />
-      <Table initialRows={rigsData} columns={columns} onDelete={onDelete} onCreate={onCreate}/>
+      <Table initialRows={rigsData} columns={columns} onDelete={onDelete} onCreate={onCreate} onNewRow={newRigRow}/>
     </>
   )
 };

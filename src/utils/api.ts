@@ -103,6 +103,38 @@ class Api {
       .then(res => {return this._handleServerResponse(res)})
   }
 
+  createAAD(props: AAD){
+    const {
+      aadSerial,
+      aadManufacturer,
+      aadType,
+      aadDOM,
+      aadDueService,
+      aadFinal,
+      jumps,
+      rig,
+    } = props;
+
+    return fetch(`${this._url}aads`, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        // authorization: `Bearer ${ localStorage.getItem('token') }`,
+      },
+      body: JSON.stringify({
+        aadSerial,
+        aadManufacturer,
+        aadType,
+        aadDOM,
+        aadDueService,
+        aadFinal,
+        jumps,
+        rig: rig !== "" ? rig : null,
+      }),
+    })
+      .then(res => {return this._handleServerResponse(res)})
+  }
+
   deleteRig(rigId: string):Promise<any>{
     return fetch(`${this._url}rigs/${rigId}`, {
       method: 'DELETE',

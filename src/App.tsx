@@ -8,38 +8,41 @@ import RigsAADsPage from "./pages/RigsAADsPage";
 import { CurrentRigsContext } from './contexts/CurrentRigsContext';
 
 function App() {
+  // console.log('App rendered');
   // const { palette } = useTheme();
   const [loading, setLoading] = useState(true);
   const [rigsData, setRigsData] = useState<Rig[]>([]);
   const [aadsData, setAADsData] = useState<AAD[]>([]);
 
   useEffect(() => {
+    // console.log('App useEffect');
     Promise.all([api.getRigsData(), api.getAADsData()])
       .then(([rigs, aads]) => {
-        // setRigsData(rigs);
-        setRigsData(
-        rigs.map((row) => {
-          const matchingAAD = aadsData.find((aad) => aad.rig === row._id);
-          // console.log(JSON.stringify(rigs, null, 2));
+        const updatedRigsData = rigs.map((row) => {
+          const matchingAAD = aads.find((aad) => aad.rig === row._id);
           return {
             ...row,
-            id: row._id || '', // Use the _id property as the id
+            id: row._id || '',
             aadSerial: matchingAAD ? matchingAAD.aadSerial : null,
-          }
-        }));
-        // setAADsData(aads);
-        setAADsData(
-          aads.map((row) => {
-            const matchingRig = rigsData.find((rig) => rig._id === row.rig);
-            return {
-              ...row,
-              id: row._id || '',
-              rigID: matchingRig ? matchingRig._id : null,
-              rigName: matchingRig ? matchingRig.rigName : null,
-              rigDescription: matchingRig ? matchingRig.rigDescription : null,
-            };
-          }));
+          };
+        });
+
+        const updatedAADsData = aads.map((row) => {
+          const matchingRig = updatedRigsData.find((rig) => rig._id === row.rig);
+          return {
+            ...row,
+            id: row._id || '',
+            rigID: matchingRig ? matchingRig._id : null,
+            rigName: matchingRig ? matchingRig.rigName : null,
+            rigDescription: matchingRig ? matchingRig.rigDescription : null,
+          };
+        });
+
+        setRigsData(updatedRigsData);
+        setAADsData(updatedAADsData);
         setLoading(false);
+        // console.log("Rigs Data:", updatedRigsData);
+        // console.log("AADs Data:", updatedAADsData);
       })
       .catch((err) => {
         console.log('There is an error:', err);
@@ -115,12 +118,46 @@ function App() {
       .catch((err) => console.log("There is an error while creating:", err));
   }
 
+  // TODO
+  const handleCreateAADBtn = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const newAAD: AAD = {
+      _id: 'someUniqueId',
+      aadSerial: 'created by button',
+      aadManufacturer: 'Vigil',
+      aadType: 'C2 TAN',
+      aadDOM: '20.11.2023',
+      aadDueService: '20.11.2023',
+      aadFinal: '20.11.2024',
+      jumps: 20,
+      rig: '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    api.createAAD(newAAD)
+      .then((aad) => {
+        setAADsData([aad, ...aadsData])
+        console.log(`Item with ID ${aad._id}, rig ${JSON.stringify(aad)} created successfully`)
+      })
+      .catch((err) => console.log("There is an error while creating:", err));
+  }
+
+  const handleCreateAAD = (newAAD: any) => {
+    console.log(newAAD)
+    api.createAAD(newAAD)
+      .then((aad) => {
+        setRigsData([aad, ...aadsData])
+        console.log(`Item with ID ${aad._id} created successfully`)
+      })
+      .catch((err) => console.log("There is an error while creating:", err));
+  }
+
   return (
     <CurrentRigsContext.Provider value={rigsData}> {/*  value to provide from App to below components */}
       <div className="App">
         <CssBaseline />
         <h1>SKYDIVE ERP SYSTEM</h1>
         <button onClick={handleCreateRigBtn}> Create test rig on server </button>
+        <button onClick={handleCreateAADBtn}> Create test AAD on server </button>
         {!loading && (
           <>
             <RigsPage
@@ -132,7 +169,7 @@ function App() {
             <RigsAADsPage
               aadsData={aadsData}
               onDelete={handleDeleteAAD}
-              onCreate={handleCreateRig}
+              onCreate={handleCreateAAD}
             />
             {/*initialRows={rigsData as GridRowModel[]}*/}
           </>

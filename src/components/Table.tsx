@@ -84,7 +84,7 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate }: TableProps<T>) 
     console.log(rows)
     console.log(initialRows)
     const isEditedRowInInitialRows = initialRows.some(row => {
-      return editedRow && row.id === editedRow.id; // Check that editedRow is not undefined
+      return editedRow && row.id === editedRow.id; // Check that editedRow is not undefined for TS
     });
     // If it's a new row, call onCreate to create the row on the server
     if (!isEditedRowInInitialRows) {

@@ -41,7 +41,7 @@ function App() {
         setRigsData(updatedRigsData);
         setAADsData(updatedAADsData);
         setLoading(false);
-        // console.log("Rigs Data:", updatedRigsData);
+        console.log("Rigs Data:", updatedRigsData);
         // console.log("AADs Data:", updatedAADsData);
       })
       .catch((err) => {
@@ -109,11 +109,12 @@ function App() {
   }
 
   const handleCreateRig = (newRig: any) => {
-    console.log(newRig)
+    // console.log(newRig)
     api.createRig(newRig)
       .then((rig) => {
         setRigsData([rig, ...rigsData])
         console.log(`Item with ID ${rig._id} created successfully`)
+        return rig
       })
       .catch((err) => console.log("There is an error while creating:", err));
   }
@@ -151,6 +152,34 @@ function App() {
       .catch((err) => console.log("There is an error while creating:", err));
   }
 
+
+  const handleUpdateRig = (rigToUpdate: any) => {
+    // console.log(rigToUpdate)
+    api.updateRigData(rigToUpdate)
+      .then((updatedRig) => {
+        const updatedRigs = rigsData.map((rig) =>
+          rig._id === updatedRig._id ? updatedRig : rig
+        );
+        setRigsData(updatedRigs);
+        console.log(`Item with ID ${updatedRig._id} updated successfully`);
+      })
+      .catch((err) => console.log("There is an error while updating:", err));
+  }
+
+  const handleUpdateAAD = (aadToUpdate: any) => {
+    // console.log(aadToUpdate)
+    api.updateAADData(aadToUpdate)
+      .then((updatedAAD) => {
+        const updatedAADs = rigsData.map((rig) =>
+          rig._id === updatedAAD._id ? updatedAAD : rig
+        );
+        setAADsData(updatedAADs);
+        console.log(`Item with ID ${updatedAAD._id} updated successfully`);
+      })
+      .catch((err) => console.log("There is an error while updating:", err));
+  }
+
+
   return (
     <CurrentRigsContext.Provider value={rigsData}> {/*  value to provide from App to below components */}
       <div className="App">
@@ -164,12 +193,14 @@ function App() {
               rigsData={rigsData}
               onDelete={handleDeleteRig}
               onCreate={handleCreateRig}
+              onUpdate={handleUpdateRig}
             />
             <br />
             <RigsAADsPage
               aadsData={aadsData}
               onDelete={handleDeleteAAD}
               onCreate={handleCreateAAD}
+              onUpdate={handleUpdateAAD}
             />
             {/*initialRows={rigsData as GridRowModel[]}*/}
           </>

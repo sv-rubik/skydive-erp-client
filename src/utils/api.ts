@@ -157,20 +157,67 @@ class Api {
       .then(res => {return this._handleServerResponse(res)})
   }
 
-  //
-  // sendAvatarLink(avatarLink) {
-  //   return fetch(`${this._url}users/me/avatar`, {
-  //     method: 'PATCH',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       authorization: `Bearer ${ localStorage.getItem('token') }`,
-  //     },
-  //     body: JSON.stringify({
-  //       avatar: avatarLink.avatar
-  //     })
-  //   })
-  //     .then(res => {return this._handleServerResponse(res)})
-  // }
+  updateRigData(props: Rig) {
+    const {
+      rigNumber,
+      rigName,
+      rigSize,
+      rigType,
+      rigSerial,
+      rigDOM,
+      rigDescription,
+      container,
+    } = props;
+    return fetch(`${this._url}rigs/rig`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        // authorization: `Bearer ${ localStorage.getItem('token') }`,
+      },
+      body: JSON.stringify({
+        rigNumber,
+        rigName,
+        rigSize,
+        rigType,
+        rigSerial,
+        rigDOM,
+        rigDescription,
+        container,
+      }),
+    })
+      .then(res => {return this._handleServerResponse(res)})
+  }
+
+  updateAADData(props: AAD) {
+    const {
+      aadSerial,
+      aadManufacturer,
+      aadType,
+      aadDOM,
+      aadDueService,
+      aadFinal,
+      jumps,
+      rig,
+    } = props;
+    return fetch(`${this._url}aads/aad`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        // authorization: `Bearer ${ localStorage.getItem('token') }`,
+      },
+      body: JSON.stringify({
+        aadSerial,
+        aadManufacturer,
+        aadType,
+        aadDOM,
+        aadDueService: aadDueService !== "" ? aadDueService : null,
+        aadFinal: aadFinal !== "" ? aadFinal : null,
+        jumps,
+        rig: rig !== "" ? rig : null,
+      }),
+    })
+      .then(res => {return this._handleServerResponse(res)})
+  }
 }
 
 ////// TODO

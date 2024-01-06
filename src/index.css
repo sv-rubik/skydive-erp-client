@@ -10,5 +10,8 @@ html, body, #root, .app {
   /*overflow: hidden;*/
 }
 
-
+.super-app-theme--header {
+  color: #5229d7;
+  font-size: 0.9rem;
+}
 

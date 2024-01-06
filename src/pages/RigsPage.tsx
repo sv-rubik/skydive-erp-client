@@ -10,9 +10,10 @@ interface RigsPageProps {
   // aadsData: AAD[];
   onDelete: any;
   onCreate: any;
+  onUpdate: any;
 }
 
-const RigsPage: React.FC<RigsPageProps>  = ({ rigsData, onDelete, onCreate }) => {
+const RigsPage: React.FC<RigsPageProps>  = ({ rigsData, onDelete, onCreate, onUpdate }) => {
   // console.log(JSON.stringify(rigsData, null, 2));
   const id = randomId();
   const newRigRow = {
@@ -99,7 +100,14 @@ const RigsPage: React.FC<RigsPageProps>  = ({ rigsData, onDelete, onCreate }) =>
   return (
     <>
       <TableHeader text={`RigsPage table`} />
-      <Table initialRows={rigsData} columns={columns} onDelete={onDelete} onCreate={onCreate} onNewRow={newRigRow}/>
+      <Table
+        initialRows={rigsData}
+        columns={columns}
+        onDelete={onDelete}
+        onCreate={onCreate}
+        onNewRow={newRigRow}
+        onUpdate={onUpdate}
+      />
     </>
   )
 };

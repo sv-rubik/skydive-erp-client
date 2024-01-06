@@ -20,9 +20,6 @@ import {
   GridEditCellValueParams,
   GridRowEditStopReasons,
 } from '@mui/x-data-grid';
-import {
-  randomId,
-} from '@mui/x-data-grid-generator';
 
 interface EditToolbarProps {
   setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
@@ -36,7 +33,7 @@ function EditToolbar(props: EditToolbarProps) {
   const { setRows, setRowModesModel, onNewRow } = props;
 
   const handleClick = () => {
-
+    //setting new row with empty cells from onNewRow
     setRows((oldRows) => [...oldRows, onNewRow]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
@@ -59,9 +56,10 @@ interface TableProps<T> {
   onDelete: any;
   onCreate: any;
   onNewRow: any;
+  onUpdate: any;
 }
 
-const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow }: TableProps<T>) => {
+const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow, onUpdate }: TableProps<T>) => {
   const { palette } = useTheme();
   const [rows, setRows] = React.useState(initialRows);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
@@ -78,24 +76,6 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow }: Table
   };
 
   const handleSaveClick = (id: GridRowId) => () => {
-    // // TODO add notification on Bad request error
-    // const editedRow = rows.find((row) => row.id === id);
-    // console.log(`editedRow - ${JSON.stringify(editedRow)}`)
-    // console.log(rows)
-    // console.log(initialRows)
-    // const isEditedRowInInitialRows = initialRows.some(row => {
-    //   return editedRow && row.id === editedRow.id; // Check that editedRow is not undefined for TS
-    // });
-    // // If it's a new row, call onCreate to create the row on the server
-    // if (!isEditedRowInInitialRows) {
-    //   setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-    //   onCreate(editedRow)
-    // } else {
-    //   // If it's an existing row, call onUpdate function instead
-    //   setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-    //   // TODO add onUpdate
-    // }
-
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
@@ -111,11 +91,15 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow }: Table
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    console.log(newRow)
-    if (newRow.isNew) {onCreate(newRow)}
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+  const processRowUpdate = (someRow: GridRowModel) => {
+    console.log(someRow);
+    // new row creation on server
+    if (someRow.isNew) {onCreate(someRow)}
+    // row update on server
+    else {onUpdate(someRow)}
+
+    const updatedRow = { ...someRow, isNew: false };
+    setRows(rows.map((row) => (row.id === someRow.id ? updatedRow : row)));
     return updatedRow;
   };
 
@@ -206,9 +190,9 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow }: Table
           onRowModesModelChange={handleRowModesModelChange}
           onRowEditStop={handleRowEditStop}
           processRowUpdate={processRowUpdate}
-          // onProcessRowUpdateError={(error) => {
-          //   console.error(error);
-          // }}
+          onProcessRowUpdateError={(error) => {
+            console.error(error);
+          }}
           // onEditCellChange={(params: GridEditCellValueParams) => {
           //   const updatedRows = rows.map((row) =>
           //     row.id === params.id ? { ...row, [params.field]: params.value } : row

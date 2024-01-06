@@ -1,7 +1,7 @@
 import React from 'react'
 import Table from "../components/Table";
 import {AAD, Rig} from "../utils/types";
-import { GridRenderCellParams } from '@mui/x-data-grid';
+import {GridColDef, GridRenderCellParams} from '@mui/x-data-grid';
 import TableHeader from "../components/TableHeader";
 import {randomId} from "@mui/x-data-grid-generator";
 
@@ -9,9 +9,10 @@ interface RigsAADsPageProps {
   aadsData: AAD[];
   onDelete: any;
   onCreate: any;
+  onUpdate: any;
 }
 
-const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCreate }) => {
+const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCreate, onUpdate }) => {
   const id = randomId();
   const newAADRow = {
     id,
@@ -26,16 +27,18 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
     isNew: true
   }
 
-  const columns = [
+  const columns: GridColDef[] = [
     {
       field: 'rig',
       headerName: 'Rig _id from AAD',
+      headerClassName: 'super-app-theme--header',
+      // headerAlign: 'center',
       flex: 0.2,
       editable: true,
       renderCell: (params: GridRenderCellParams) => (
-        <span style={{ color:'red'}}>
-          {params.value}
-        </span>
+          <span style={{ color:'red'}}>
+            {params.value}
+          </span>
       ),
     },
     {
@@ -95,7 +98,14 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
   return (
     <>
       <TableHeader text={`RigsAADsPage table`} />
-      <Table initialRows={aadsData} columns={columns} onDelete={onDelete} onCreate={onCreate} onNewRow={newAADRow}/>
+      <Table
+        initialRows={aadsData}
+        columns={columns}
+        onDelete={onDelete}
+        onCreate={onCreate}
+        onNewRow={newAADRow}
+        onUpdate={onUpdate}
+      />
     </>
 
   )

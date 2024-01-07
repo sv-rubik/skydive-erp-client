@@ -11,13 +11,14 @@ interface RigsPageProps {
   onDelete: any;
   onCreate: any;
   onUpdate: any;
+  updateData: any;
 }
 
-const RigsPage: React.FC<RigsPageProps>  = ({ rigsData, onDelete, onCreate, onUpdate }) => {
+const RigsPage: React.FC<RigsPageProps>  = ({ rigsData, onDelete, onCreate, onUpdate, updateData }) => {
   // console.log(JSON.stringify(rigsData, null, 2));
-  const id = randomId();
+  const _id = randomId();
   const newRigRow = {
-    id,
+    _id,
     rigNumber: '',
     rigName: '',
     rigSize: '',
@@ -40,18 +41,21 @@ const RigsPage: React.FC<RigsPageProps>  = ({ rigsData, onDelete, onCreate, onUp
       headerName: 'Rig #',
       flex: 0.1,
       editable: true,
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'rigName',
       headerName: 'Rig Name',
       flex: 0.1,
       editable: true,
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'rigSize',
       headerName: 'Rig Size',
       flex: 0.1,
       editable: true,
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'rigType',
@@ -60,24 +64,28 @@ const RigsPage: React.FC<RigsPageProps>  = ({ rigsData, onDelete, onCreate, onUp
       editable: true,
       type: 'singleSelect',
       valueOptions: ['tandem', 'student', 'instructor'],
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'rigSerial',
       headerName: 'Serial',
       flex: 0.1,
       editable: true,
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'rigDOM',
       headerName: 'DOM',
       flex: 0.2,
       editable: true,
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'container',
       headerName: 'Container',
       flex: 0.1,
       editable: true,
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'rigDescription',
@@ -107,6 +115,7 @@ const RigsPage: React.FC<RigsPageProps>  = ({ rigsData, onDelete, onCreate, onUp
         onCreate={onCreate}
         onNewRow={newRigRow}
         onUpdate={onUpdate}
+        updateData={updateData}
       />
     </>
   )

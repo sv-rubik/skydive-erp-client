@@ -10,12 +10,13 @@ interface RigsAADsPageProps {
   onDelete: any;
   onCreate: any;
   onUpdate: any;
+  updateData: any;
 }
 
-const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCreate, onUpdate }) => {
-  const id = randomId();
+const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCreate, onUpdate, updateData }) => {
+  const _id = randomId();
   const newAADRow = {
-    id,
+    _id,
     aadSerial: '',
     aadManufacturer: '',
     aadType: '',
@@ -31,7 +32,6 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
     {
       field: 'rig',
       headerName: 'Rig _id from AAD',
-      headerClassName: 'super-app-theme--header',
       // headerAlign: 'center',
       flex: 0.2,
       editable: true,
@@ -56,12 +56,14 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
       headerName: 'aadSerial',
       flex: 0.1,
       editable: true,
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'aadManufacturer',
       headerName: 'aadManufacturer',
       flex: 0.1,
       editable: true,
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'aadType',
@@ -70,18 +72,21 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
       editable: true,
       type: 'singleSelect',
       valueOptions: ['C2 TAN', 'C-MODE', 'C2 STU', 'C2 CMode'],
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'aadDOM',
       headerName: 'aadDOM',
       flex: 0.2,
       editable: true,
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'jumps',
       headerName: 'jumps',
       flex: 0.1,
       editable: true,
+      headerClassName: 'super-app-theme--header',
     },
     {
       field: 'rigDescription',
@@ -105,6 +110,7 @@ const RigsAADsPage: React.FC<RigsAADsPageProps>  = ({ aadsData, onDelete, onCrea
         onCreate={onCreate}
         onNewRow={newAADRow}
         onUpdate={onUpdate}
+        updateData={updateData}
       />
     </>
 

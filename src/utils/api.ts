@@ -168,7 +168,7 @@ class Api {
       rigDescription,
       container,
     } = props;
-    return fetch(`${this._url}rigs/rig`, {
+    return fetch(`${this._url}rigs/${props._id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -199,7 +199,7 @@ class Api {
       jumps,
       rig,
     } = props;
-    return fetch(`${this._url}aads/aad`, {
+    return fetch(`${this._url}aads/${props._id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

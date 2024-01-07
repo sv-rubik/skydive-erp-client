@@ -5,7 +5,8 @@ import RigsPage from './pages/RigsPage';
 import { api } from './utils/api';
 import { Rig, AAD } from './utils/types'
 import RigsAADsPage from "./pages/RigsAADsPage";
-import { CurrentRigsContext } from './contexts/CurrentRigsContext';
+import { CurrentStateIsDataUpdatedContext } from './contexts/CurrenStateIsDataUpdated';
+import {processAADsData, processRigsData} from "./utils/helpersFunctions";
 
 function App() {
   // console.log('App rendered');
@@ -13,35 +14,21 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [rigsData, setRigsData] = useState<Rig[]>([]);
   const [aadsData, setAADsData] = useState<AAD[]>([]);
+  //////////////////////////////
+  // const [isRigsDataUpdated, setIsRigsDataUpdated] = useState(false);
+  // const [isAADsDataUpdated, setIsAADsDataUpdated] = useState(false);
+  const [isDataUpdated, setIsDataUpdated] = useState(false);
 
   useEffect(() => {
     // console.log('App useEffect');
     Promise.all([api.getRigsData(), api.getAADsData()])
       .then(([rigs, aads]) => {
-        const updatedRigsData = rigs.map((row) => {
-          const matchingAAD = aads.find((aad) => aad.rig === row._id);
-          return {
-            ...row,
-            id: row._id || '',
-            aadSerial: matchingAAD ? matchingAAD.aadSerial : null,
-          };
-        });
-
-        const updatedAADsData = aads.map((row) => {
-          const matchingRig = updatedRigsData.find((rig) => rig._id === row.rig);
-          return {
-            ...row,
-            id: row._id || '',
-            // rigID: matchingRig ? matchingRig._id : null,
-            rigName: matchingRig ? matchingRig.rigName : null,
-            rigDescription: matchingRig ? matchingRig.rigDescription : null,
-          };
-        });
-
+        const updatedRigsData = processRigsData(rigs, aads )
+        const updatedAADsData = processAADsData(rigs, aads)
         setRigsData(updatedRigsData);
         setAADsData(updatedAADsData);
         setLoading(false);
-        console.log("Rigs Data:", updatedRigsData);
+        // console.log("Rigs Data:", updatedRigsData);
         // console.log("AADs Data:", updatedAADsData);
       })
       .catch((err) => {
@@ -49,24 +36,53 @@ function App() {
         setLoading(false);
       });
   }, []);
+  //isDataUpdated
 
-  type DeleteApiFunction = (itemId: string) => Promise<any>;
-  const handleDeleteItem = (
-    itemId: string,
-    apiFunction: DeleteApiFunction
-  ) => {
-    apiFunction(itemId)
-      .then(() => console.log(`Item with ID ${itemId} deleted successfully`))
-      .catch((err) => console.log("There is an error while deleting:", err));
+  const handleDeleteRig = (rigID: string) => {
+    api.deleteRig(rigID)
+      .then(() => {
+        // Is needed to pass updated rigsData to initialRows in Table
+        const updatedRigsData = processRigsData(
+          rigsData.filter((rig) => (rig._id !== rigID ? rig : null)),
+          aadsData
+        );
+        setRigsData(updatedRigsData);
+
+        // search for aad with rig = itemId and set add.rig to ''
+        const aadToUpdate = aadsData.find((aad) => aad.rig === rigID)
+        // If aadToUpdate exists, update its rig field to ''
+        if (aadToUpdate) {
+          const updatedAAD = { ...aadToUpdate, rig: '' };
+          handleUpdateAAD(updatedAAD);
+        }
+
+        setIsDataUpdated(true);
+        console.log(`Rig with ID ${rigID} deleted successfully`);
+      })
+      .catch((err) => {
+        console.log("There is an error while deleting:", err);
+        setIsDataUpdated(false);
+      });
+};
+
+  const handleDeleteAAD = (aadID: string) => {
+    api.deleteAAD(aadID)
+      .then(() => {
+        // Is needed to pass updated rigsData to initialRows in Table
+        const updatedAADsData = processAADsData(
+          rigsData,
+          aadsData.filter((aad) => (aad._id !== aadID ? aad : null)),
+        );
+        setAADsData(updatedAADsData);
+        setIsDataUpdated(true);
+        console.log(`Rig with ID ${aadID} deleted successfully`);
+      })
+      .catch((err) => {
+        console.log("There is an error while deleting:", err);
+        setIsDataUpdated(false);
+    });
   };
-// DeleteApiFunction for "rig" model
-  const handleDeleteRig = (itemId: string) => {
-    handleDeleteItem(itemId, api.deleteRig.bind(api));
-  }
-// DeleteApiFunction for "aad" model
-  const handleDeleteAAD = (itemId: string) => {
-    handleDeleteItem(itemId, api.deleteAAD.bind(api));
-  };
+
 
   // type CreateApiFunction = (itemId: string) => Promise<any>;
   // const handleCreateItem = (
@@ -86,107 +102,81 @@ function App() {
 //     handleCreateItem(itemId, api.createRig.bind(api));
 //   };
 
-  const handleCreateRigBtn = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const newRig: Rig = {
-      _id: 'someUniqueId',
-      rigNumber: 1,
-      rigName: 'newrig',
-      rigSize: 220,
-      rigType: 'tandem',
-      rigSerial: 'kjgfdfkjg',
-      rigDOM: '2025-11-20T00:00:00.000Z',
-      rigDescription: 'text',
-      container: 20,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    api.createRig(newRig)
-      .then((rig) => {
-        setRigsData([rig, ...rigsData])
-        console.log(`Item with ID ${rig._id}, rig ${JSON.stringify(rig)} created successfully`)
-      })
-      .catch((err) => console.log("There is an error while creating:", err));
-  }
-
   const handleCreateRig = (newRig: any) => {
     // console.log(newRig)
     api.createRig(newRig)
       .then((rig) => {
-        setRigsData([rig, ...rigsData])
+        // setRigsData([rig, ...rigsData])
+        const updatedRigsData = processRigsData([...rigsData, rig], aadsData);
+        setRigsData(updatedRigsData);
+        setIsDataUpdated(true);
         console.log(`Item with ID ${rig._id} created successfully`)
         return rig
       })
-      .catch((err) => console.log("There is an error while creating:", err));
-  }
-
-  // TODO
-  const handleCreateAADBtn = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const newAAD: AAD = {
-      _id: 'someUniqueId',
-      aadSerial: 'created by button',
-      aadManufacturer: 'Vigil',
-      aadType: 'C2 TAN',
-      aadDOM: '20.11.2023',
-      aadDueService: '',
-      aadFinal: '',
-      jumps: 20,
-      rig: '',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    api.createAAD(newAAD)
-      .then((aad) => {
-        setAADsData([aad, ...aadsData])
-        console.log(`Item with ID ${aad._id}, rig ${JSON.stringify(aad)} created successfully`)
-      })
-      .catch((err) => console.log("There is an error while creating:", err));
+      .catch((err) => {
+        console.log("There is an error while creating:", err)
+        setIsDataUpdated(false);
+      });
   }
 
   const handleCreateAAD = (newAAD: any) => {
-    console.log(newAAD)
     api.createAAD(newAAD)
       .then((aad) => {
-        setRigsData([aad, ...aadsData])
+        const updatedAADsData = processAADsData( rigsData, [...aadsData, aad]);
+        setAADsData(updatedAADsData);
+        setIsDataUpdated(true);
         console.log(`Item with ID ${aad._id} created successfully`)
       })
-      .catch((err) => console.log("There is an error while creating:", err));
+      .catch((err) => {
+        console.log("There is an error while creating:", err)
+        setIsDataUpdated(false);
+      });
   }
 
-
   const handleUpdateRig = (rigToUpdate: any) => {
-    // console.log(rigToUpdate)
     api.updateRigData(rigToUpdate)
       .then((updatedRig) => {
-        const updatedRigs = rigsData.map((rig) =>
-          rig._id === updatedRig._id ? updatedRig : rig
+        const updatedRigsData = processRigsData(
+          rigsData.map((rig) => (rig._id === updatedRig._id ? updatedRig : rig)),
+          aadsData
         );
-        setRigsData(updatedRigs);
+        setRigsData(updatedRigsData);
+        // setIsRigsDataUpdated(true);
+        setIsDataUpdated(true);
         console.log(`Item with ID ${updatedRig._id} updated successfully`);
       })
-      .catch((err) => console.log("There is an error while updating:", err));
+      .catch((err) => {
+        console.log("There is an error while updating:", err)
+        setIsDataUpdated(false);
+        // setIsRigsDataUpdated(false);
+      });
   }
 
   const handleUpdateAAD = (aadToUpdate: any) => {
-    // console.log(aadToUpdate)
     api.updateAADData(aadToUpdate)
       .then((updatedAAD) => {
-        const updatedAADs = rigsData.map((rig) =>
-          rig._id === updatedAAD._id ? updatedAAD : rig
+        const updatedAADsData = processAADsData(
+          rigsData,
+          aadsData.map((aad) => (aad._id === updatedAAD._id ? updatedAAD : aad)),
         );
-        setAADsData(updatedAADs);
+        setAADsData(updatedAADsData);
+        setIsDataUpdated(true);
+        // setIsAADsDataUpdated(true);
         console.log(`Item with ID ${updatedAAD._id} updated successfully`);
       })
-      .catch((err) => console.log("There is an error while updating:", err));
+      .catch((err) => {
+        console.log("There is an error while updating:", err)
+        setIsDataUpdated(false);
+        // setIsAADsDataUpdated(false);
+      });
   }
 
 
   return (
-    <CurrentRigsContext.Provider value={rigsData}> {/*  value to provide from App to below components */}
+    <CurrentStateIsDataUpdatedContext.Provider value={{ isDataUpdated, setIsDataUpdated }}> {/*  value to provide from App to below components */}
       <div className="App">
         <CssBaseline />
         <h1>SKYDIVE ERP SYSTEM</h1>
-        <button onClick={handleCreateRigBtn}> Create test rig on server </button>
-        <button onClick={handleCreateAADBtn}> Create test AAD on server </button>
         {!loading && (
           <>
             <RigsPage
@@ -194,6 +184,8 @@ function App() {
               onDelete={handleDeleteRig}
               onCreate={handleCreateRig}
               onUpdate={handleUpdateRig}
+              updateData={isDataUpdated}
+
             />
             <br />
             <RigsAADsPage
@@ -201,13 +193,13 @@ function App() {
               onDelete={handleDeleteAAD}
               onCreate={handleCreateAAD}
               onUpdate={handleUpdateAAD}
+              updateData={isDataUpdated}
             />
-            {/*initialRows={rigsData as GridRowModel[]}*/}
           </>
         )}
 
       </div>
-    </CurrentRigsContext.Provider>
+    </CurrentStateIsDataUpdatedContext.Provider>
   );
 }
 

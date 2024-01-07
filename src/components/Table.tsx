@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useContext, useEffect} from 'react'
 import { Box, Button, useTheme } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,6 +20,7 @@ import {
   GridEditCellValueParams,
   GridRowEditStopReasons,
 } from '@mui/x-data-grid';
+import {CurrentStateIsDataUpdatedContext} from "../contexts/CurrenStateIsDataUpdated";
 
 interface EditToolbarProps {
   setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
@@ -37,7 +38,7 @@ function EditToolbar(props: EditToolbarProps) {
     setRows((oldRows) => [...oldRows, onNewRow]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [onNewRow.id]: { mode: GridRowModes.Edit, fieldToFocus: 'rigName' }, // TODO fieldToFocus
+      [onNewRow._id]: { mode: GridRowModes.Edit, fieldToFocus: 'rigName' },
     }));
   };
 
@@ -57,12 +58,23 @@ interface TableProps<T> {
   onCreate: any;
   onNewRow: any;
   onUpdate: any;
+  updateData: any;
 }
 
-const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow, onUpdate }: TableProps<T>) => {
+const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow, onUpdate, updateData }: TableProps<T>) => {
   const { palette } = useTheme();
   const [rows, setRows] = React.useState(initialRows);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
+  const { isDataUpdated, setIsDataUpdated } = useContext(CurrentStateIsDataUpdatedContext);
+
+//  Update rows after changes made
+  useEffect(() => {
+    if (updateData) {
+      // console.log('data updated')
+      setRows(initialRows);
+      setIsDataUpdated(false);
+    }
+  }, [updateData]);
 
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -85,7 +97,7 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow, onUpdat
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
     });
 
-    const editedRow = rows.find((row) => row.id === id);
+    const editedRow = rows.find((row) => row._id === id);
     if (editedRow!.isNew) {
       setRows(rows.filter((row) => row.id !== id));
     }
@@ -99,7 +111,7 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow, onUpdat
     else {onUpdate(someRow)}
 
     const updatedRow = { ...someRow, isNew: false };
-    setRows(rows.map((row) => (row.id === someRow.id ? updatedRow : row)));
+    setRows(rows.map((row) => (row._id === someRow._id ? updatedRow : row)));
     return updatedRow;
   };
 
@@ -108,7 +120,7 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow, onUpdat
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    setRows(rows.filter((row) => row.id !== id));
+    setRows(rows.filter((row) => row._id !== id));
     onDelete(id);
   };
 
@@ -181,7 +193,6 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow, onUpdat
           columnHeaderHeight={25}
           rowHeight={35}
           hideFooter={true}
-          //initialRows as GridRowsProp || []
           rows={rows}
           columns={mergedColumns}
           editMode="row"
@@ -199,6 +210,7 @@ const Table = <T,>({ initialRows, columns, onDelete, onCreate, onNewRow, onUpdat
           //   );
           //   setRows(updatedRows);
           // }}
+          getRowId={(row) => row._id}
           slots={{ toolbar: EditToolbar }}
           slotProps={{
             toolbar: { setRows, setRowModesModel, onNewRow },

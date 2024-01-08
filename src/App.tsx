@@ -10,13 +10,9 @@ import {processAADsData, processRigsData} from "./utils/helpersFunctions";
 
 function App() {
   // console.log('App rendered');
-  // const { palette } = useTheme();
   const [loading, setLoading] = useState(true);
   const [rigsData, setRigsData] = useState<Rig[]>([]);
   const [aadsData, setAADsData] = useState<AAD[]>([]);
-  //////////////////////////////
-  // const [isRigsDataUpdated, setIsRigsDataUpdated] = useState(false);
-  // const [isAADsDataUpdated, setIsAADsDataUpdated] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
 
   useEffect(() => {
@@ -36,7 +32,6 @@ function App() {
         setLoading(false);
       });
   }, []);
-  //isDataUpdated
 
   const handleDeleteRig = (rigID: string) => {
     api.deleteRig(rigID)
@@ -106,7 +101,6 @@ function App() {
     // console.log(newRig)
     api.createRig(newRig)
       .then((rig) => {
-        // setRigsData([rig, ...rigsData])
         const updatedRigsData = processRigsData([...rigsData, rig], aadsData);
         setRigsData(updatedRigsData);
         setIsDataUpdated(true);
@@ -141,14 +135,12 @@ function App() {
           aadsData
         );
         setRigsData(updatedRigsData);
-        // setIsRigsDataUpdated(true);
         setIsDataUpdated(true);
         console.log(`Item with ID ${updatedRig._id} updated successfully`);
       })
       .catch((err) => {
         console.log("There is an error while updating:", err)
         setIsDataUpdated(false);
-        // setIsRigsDataUpdated(false);
       });
   }
 
@@ -161,19 +153,17 @@ function App() {
         );
         setAADsData(updatedAADsData);
         setIsDataUpdated(true);
-        // setIsAADsDataUpdated(true);
         console.log(`Item with ID ${updatedAAD._id} updated successfully`);
       })
       .catch((err) => {
         console.log("There is an error while updating:", err)
         setIsDataUpdated(false);
-        // setIsAADsDataUpdated(false);
       });
   }
 
 
   return (
-    <CurrentStateIsDataUpdatedContext.Provider value={{ isDataUpdated, setIsDataUpdated }}> {/*  value to provide from App to below components */}
+    <CurrentStateIsDataUpdatedContext.Provider value={{ isDataUpdated, setIsDataUpdated }}>
       <div className="App">
         <CssBaseline />
         <h1>SKYDIVE ERP SYSTEM</h1>
@@ -197,7 +187,6 @@ function App() {
             />
           </>
         )}
-
       </div>
     </CurrentStateIsDataUpdatedContext.Provider>
   );
